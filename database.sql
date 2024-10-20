@@ -93,3 +93,35 @@ INSERT INTO `categories` (`name`, `created_at`) VALUES
 ("Vaření", NOW()),
 ("Coding", NOW());
 
+-- vytvorení topics - témat
+INSERT INTO `topics` (`user_id`, `category_id`, `title`, `created_at`) VALUES
+(13, 1, "Hraní Hogwartz Legacy", NOW());
+
+INSERT INTO `topics` (`user_id`, `category_id`, `title`, `created_at`) VALUES
+(16, 2, "Sack Boy", NOW()),
+(15, 3, "Progromování databáze mě zabije", NOW()),
+(13, 3, "Project s Jirkou", NOW()),
+(13, 1, "League of Legends", NOW());
+
+-- vytvoření posts 
+
+INSERT INTO `posts` (`user_id`, `topic_id`, `content`, `created_at`) VALUES
+(16, 2, "Hraní Sackboye bylo zajímavé ale ještě není finished. Lorem100", NOW());
+
+INSERT INTO `posts` (`user_id`, `topic_id`, `content`, `created_at`) VALUES
+(15, 3, "Ono to nebylo na konec až tak strašný:D", NOW()),
+(13, 4, "Tak Jirko doufám že si čteš tuhle zprávou, večeře byla dobrá, ale checknuli jsme ještě JoJo, příští post bude s lorem 400 abych otestoval velikost zprávy.", NOW()),
+(13, 5, "Lorem ipsum dolor sit amet consectetur, adipisicing elit. In alias, obcaecati perspiciatis voluptas quo illum consequatur. Recusandae commodi minus ea aspernatur quo velit asperiores aut nemo deleniti explicabo. Esse assumenda quasi, aperiam dicta soluta, maxime cumque officiis amet nisi quia labore repellendus quaerat aliquid minus. Culpa, iure nobis asperiores accusamus, non, vero dolorem molestiae id voluptatibus nemo aliquid facere nam! Amet saepe earum in cumque cum, a laborum similique quisquam doloribus! Saepe distinctio, dolorem ullam reiciendis debitis sed vitae minus culpa blanditiis suscipit ex omnis dignissimos eligendi, libero reprehenderit dolore illo vel fuga at quaerat quidem aliquid. Doloremque tenetur quam nihil alias, porro blanditiis repudiandae provident adipisci in libero sint et sed deleniti unde voluptate vero cupiditate assumenda saepe totam facilis dolorum. Fuga quae, veniam blanditiis provident explicabo accusamus nam molestiae sed reiciendis? Iusto debitis doloribus odio officiis ex voluptates suscipit, vitae sapiente ratione vero corporis aliquid itaque neque repellendus nihil doloremque! Sunt velit ipsa incidunt dolor, sint ut aperiam excepturi impedit similique voluptates natus minima ullam aspernatur, harum maxime? Dignissimos iure fuga nihil ipsa? Porro unde delectus consectetur aut accusamus veniam magnam ab placeat architecto veritatis culpa ducimus, perferendis voluptate id! Sint at voluptatibus quidem libero deserunt asperiores dolor!Lorem ipsum dolor sit amet consectetur, adipisicing elit. In alias, obcaecati perspiciatis voluptas quo illum consequatur. Recusandae commodi minus ea aspernatur quo velit asperiores aut nemo deleniti explicabo. Esse assumenda quasi, aperiam dicta soluta, maxime cumque officiis amet nisi quia labore repellendus quaerat aliquid minus. Culpa, iure nobis asperiores accusamus, non, vero dolorem molestiae id voluptatibus nemo aliquid facere nam! Amet saepe earum in cumque cum, a laborum similique quisquam doloribus! Saepe distinctio, dolorem ullam reiciendis debitis sed vitae minus culpa blanditiis suscipit ex omnis dignissimos eligendi, libero reprehenderit dolore illo vel fuga at quaerat quidem aliquid. Doloremque tenetur quam nihil alias, porro blanditiis repudiandae provident adipisci in libero sint et sed deleniti unde voluptate vero cupiditate assumenda saepe totam facilis dolorum. Fuga quae, veniam blanditiis provident explicabo accusamus nam molestiae sed reiciendis? Iusto debitis doloribus odio officiis ex voluptates suscipit, vitae sapiente ratione vero corporis aliquid itaque neque repellendus nihil doloremque! Sunt velit ipsa incidunt dolor, sint ut aperiam excepturi impedit similique voluptates natus minima ullam aspernatur, harum maxime? Dignissimos iure fuga nihil ipsa? Porro unde delectus consectetur aut accusamus veniam magnam ab placeat architecto veritatis culpa ducimus, perferendis voluptate id! Sint at voluptatibus quidem libero deserunt asperiores dolor!", NOW());
+
+-- lajkovaní postů
+-- 3 z 4 lajků pro pust user_id= 16 
+INSERT INTO `likes` (`user_id`, `post_id`, `created_at`) VALUES
+(13, 1, NOW()),
+(14, 1, NOW()),
+(15, 1, NOW());
+
+INSERT INTO `likes` (`user_id`, `post_id`, `created_at`) VALUES
+(13, 2, NOW()),
+(14, 2, NOW()),
+(15, 2, NOW()),
+(16, 2, NOW());
