@@ -1,3 +1,9 @@
+<?php
+include "db/db.php";
+
+
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,8 +28,8 @@
             <div class="col">
                 <form>
                     <div class="mb-3">
-                      <label for="exampleInputEmail1" class="form-label">Přihlašovací jméno</label>
-                      <input type="text" class="form-control" id="login" aria-describedby="emailHelp">
+                      <label  class="form-label">Přihlašovací jméno</label>
+                      <input type="text" class="form-control" id="login">
                     </div>
                     <div class="mb-3">                   
                       <label for="InputPassword" class="form-label">Heslo</label>
