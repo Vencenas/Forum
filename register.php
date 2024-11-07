@@ -1,6 +1,41 @@
 <?php
 include "db/db.php";
+session_start();
+try {
+      if(array_key_exists("register", $_POST))
+      {
+        $userName = $_POST["name"];
+        $userPassword = $_POST["password"];
 
+          if(!empty($userName) && !empty($userPassword))
+          {
+            $checkStmt = $db->prepare("SELECT * FROM users WHERE username = :username");
+            $checkStmt->bindParam(':username', $userName);
+            $checkStmt->execute();
+
+            if($checkStmt->fetchColumn() > 0){
+              echo "Uživatel s tímto jménem existuje.";
+            } else {
+              $stmt = $db->prepare("INSERT INTO users (username, password, role_id) VALUES(:username, :password, :roleId)");
+              $hashedPassword = password_hash($userPassword, PASSWORD_DEFAULT);
+              $roleId = 1;
+              $stmt->bindParam(':username', $userName);
+              $stmt->bindParam(':password', $hashedPassword);
+              $stmt->bindParam(':roleId', $roleId);
+
+              if($stmt->execute()){
+                echo "úspěšně ses zaregistroval";
+              } else {
+                echo "Došlo k chybě v registraci.";
+              }
+            }
+          } else {
+            echo "Prosím vypln všechna pole.";
+          }
+        }
+    }catch (PDOException $e) {
+  echo "Chyba připojení" . $e->getMessage();
+}
 
 
 ?>
@@ -26,25 +61,21 @@ include "db/db.php";
         <div class="row align-items-center">
             <div class="col"></div>
             <div class="col">
-                <form>
+                <form method="post">
                     <div class="mb-3">
                       <label  class="form-label">Přihlašovací jméno</label>
-                      <input type="text" class="form-control" id="login">
+                      <input type="text" class="form-control" id="login" name="name">
                     </div>
                     <div class="mb-3">                   
                       <label for="InputPassword" class="form-label">Heslo</label>
-                      <input type="password" class="form-control" id="password">
-                    </div>
-                    <div class="mb-3">                   
-                        <label for="InputPassword" class="form-label">Heslo znovu</label>
-                        <input type="password" class="form-control" id="password">
-                      </div> 
+                      <input type="password" class="form-control" id="password" name="password">
+                    </div>                  
                       <div class="mb-3 form-check">
                         <input type="checkbox" class="form-check-input" id="exampleCheck1">
                         <label class="form-check-label" for="exampleCheck1">Souhlasím s podmínky užívání VencisForum</label>
                       </div>
                     <div class="mb-3">Už jsi zaregistrovaný? <a href="login.html">Přihlaš se zde.</a></div>                   
-                    <button type="submit" class="btn btn-primary" id="register">Registrace</button>
+                    <button type="submit" class="btn btn-primary" id="register" name="register">Registrace</button>
                   </form>
             </div>
             <div class="col"></div>
