@@ -2,6 +2,12 @@
 include "db/db.php";
 session_start();
 
+if (!isset($_SESSION['user_id'])) {
+  // Pokud není přihlášen, přesměrujeme ho na login stránku
+  header('Location: login.php');
+  exit;
+}
+
 // SQL dotaz pro získání kategorií
 $sql_categories = "SELECT id, name FROM categories ORDER BY name ASC";
 $stmt_categories = $db->prepare($sql_categories);

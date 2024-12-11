@@ -33,6 +33,51 @@ $stmt_posts->bindParam(':topic_id', $topic_id, PDO::PARAM_INT);
 $stmt_posts->execute();
 $posts = $stmt_posts->fetchAll(PDO::FETCH_ASSOC);
 
+// Zpracování formuláře pro přidání příspěvku
+if (isset($_POST['uploadPost'])) {
+    // Získání hodnot z formuláře
+    $postTitle = isset($_POST['PostTitle']) ? $_POST['PostTitle'] : '';
+    $postContent = isset($_POST['PostContent']) ? $_POST['PostContent'] : '';
+
+    // Zajištění, že jsou vyplněny oba vstupy
+    if (!empty($postTitle) && !empty($postContent)) {
+        // Příprava SQL dotazu pro vložení příspěvku do databáze
+        $sql_insert_post = "INSERT INTO posts (topic_id, user_id, title, content, created_at) 
+                            VALUES (:topic_id, :user_id, :title, :content, NOW())";
+        $stmt_insert_post = $db->prepare($sql_insert_post);
+        $stmt_insert_post->bindParam(':topic_id', $topic_id, PDO::PARAM_INT);
+        $stmt_insert_post->bindParam(':user_id', $_SESSION['user_id'], PDO::PARAM_INT); // Předpokládáme, že uživatelské ID je uloženo v session
+        $stmt_insert_post->bindParam(':title', $postTitle, PDO::PARAM_STR);
+        $stmt_insert_post->bindParam(':content', $postContent, PDO::PARAM_STR);
+        $stmt_insert_post->execute();
+
+        // Přesměrování zpět na téma, aby se zobrazily nové příspěvky
+        header("Location: topics.php?id=$topic_id");
+        exit;
+    } else {
+        // Pokud nejsou vyplněné oba údaje
+        $error_message = "Obě pole (název a obsah příspěvku) musí být vyplněná!";
+    }
+}
+
+$postForm = null;
+if(array_key_exists("AddPost", $_POST)) {
+    $postForm = 
+    "<div>
+        <form method='POST'>
+            <textarea name='PostTitle' placeholder='Název příspěvku'></textarea>
+            <textarea name='PostContent' placeholder='Napiš sem tvůj příspěvek'></textarea>
+            <button type='submit' name='uploadPost'>Uploadni příspěvek</button>
+        </form>
+    </div>";
+} else {
+    $postForm = "<div>
+        <form method='post'>
+            <button name='AddPost'>Přidej příspěvek</button>
+        </form>
+    </div>";
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -50,11 +95,13 @@ $posts = $stmt_posts->fetchAll(PDO::FETCH_ASSOC);
           <a class="navbar-brand" href="index.php">VencisForum</a> <!-- Odkaz na homepage -->
         </div>
     </nav>
-
+    <?php echo $postForm; ?>
+    
+    </div>    
     <div class="container mt-4">
         <h1>Téma: <?php echo htmlspecialchars($topic['title']); ?></h1>
         <p><strong><?php echo htmlspecialchars($topic['username']); ?></strong> - Kategorie: <?php echo htmlspecialchars($topic['category_name']); ?> - Vytvořeno: <?php echo date('d.m.Y H:i', strtotime($topic['created_at'])); ?></p>
-
+        
         <h3>Příspěvky v tomto tématu:</h3>
 
         <!-- Zobrazení příspěvků -->
@@ -62,6 +109,7 @@ $posts = $stmt_posts->fetchAll(PDO::FETCH_ASSOC);
             <div class="list-group">
                 <?php foreach ($posts as $post): ?>
                     <a href="post.php?id=<?php echo $post['id']; ?>" class="list-group-item list-group-item-action">
+                        <h4 class="mb-1"><?php echo htmlspecialchars($post['title']); ?></h4>
                         <h5 class="mb-1"><?php echo htmlspecialchars($post['username']); ?></h5>
                         <p class="mb-1"><?php echo date('d.m.Y H:i', strtotime($post['created_at'])); ?></p>
                     </a>
