@@ -127,3 +127,32 @@ INSERT INTO `likes` (`user_id`, `post_id`, `created_at`) VALUES
 (4, 25, NOW());
 
 SELECT COUNT(*) FROM users WHERE username = :username
+
+
+
+
+-- Update 10.12.2024 přidání sloupce posts->title
+
+ALTER TABLE posts
+ADD COLUMN title VARCHAR(255);
+
+-- update 11.12.2024 dodání titles k předchozím postům
+
+UPDATE posts
+SET title = CASE id
+    WHEN 23 THEN 'Název pro příspěvek 23'
+    WHEN 24 THEN 'Název pro příspěvek 24'
+    WHEN 25 THEN 'Název pro příspěvek 25'
+    WHEN 26 THEN 'Název pro příspěvek 26'
+    ELSE title
+END
+WHERE id IN (23, 24, 25, 26);
+
+-- update 12.12.2024 přidání content do TOPICS
+ALTER TABLE topics ADD COLUMN content TEXT;
+-- 
+UPDATE topics SET content = 'Toto je obsah pro téma s ID 7' WHERE id = 7;
+UPDATE topics SET content = 'Toto je obsah pro téma s ID 8' WHERE id = 8;
+UPDATE topics SET content = 'Toto je obsah pro téma s ID 9' WHERE id = 9;
+UPDATE topics SET content = 'Toto je obsah pro téma s ID 10' WHERE id = 10;
+UPDATE topics SET content = 'Toto je obsah pro téma s ID 11' WHERE id = 11;

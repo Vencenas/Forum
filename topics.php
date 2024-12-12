@@ -2,6 +2,36 @@
 include "db/db.php";
 session_start();
 
+if (isset($_SESSION['user_id'])) {
+    $userId = $_SESSION['user_id'];
+
+    // SQL dotaz pro získání uživatelského jména
+    $sql_user = "SELECT username FROM users WHERE id = ?";
+    $stmt_user = $db->prepare($sql_user);
+    $stmt_user->execute([$userId]);
+    $user = $stmt_user->fetch(PDO::FETCH_ASSOC);
+
+    // Uložení jména do proměnné
+    $username = $user ? $user['username'] : null;
+}
+
+$sql_categories = "SELECT id, name FROM categories ORDER BY name ASC";
+$stmt_categories = $db->prepare($sql_categories);
+$stmt_categories->execute();
+$categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
+
+// SQL dotaz pro získání témat (topics)
+$sql_topics = "SELECT t.*, c.name AS category_name, u.username 
+               FROM topics t
+               JOIN categories c ON t.category_id = c.id
+               JOIN users u ON t.user_id = u.id
+               ORDER BY t.created_at DESC"; // Seřazeno podle data vytvoření témat (novější první)
+$stmt_topics = $db->prepare($sql_topics);
+$stmt_topics->execute();
+
+// Výběr všech témat do pole
+$topics = $stmt_topics->fetchAll(PDO::FETCH_ASSOC);
+
 // Získání ID tématu z URL
 $topic_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
@@ -63,17 +93,17 @@ if (isset($_POST['uploadPost'])) {
 $postForm = null;
 if(array_key_exists("AddPost", $_POST)) {
     $postForm = 
-    "<div>
+    "<div class='container'>
         <form method='POST'>
-            <textarea name='PostTitle' placeholder='Název příspěvku'></textarea>
-            <textarea name='PostContent' placeholder='Napiš sem tvůj příspěvek'></textarea>
+            <textarea name='PostTitle' placeholder='Název příspěvku' required></textarea>
+            <textarea name='PostContent' placeholder='Napiš sem tvůj příspěvek' required></textarea>
             <button type='submit' name='uploadPost'>Uploadni příspěvek</button>
         </form>
     </div>";
 } else {
-    $postForm = "<div>
+    $postForm = "<div class='container'>
         <form method='post'>
-            <button name='AddPost'>Přidej příspěvek</button>
+            <button name='AddPost' class='btn btn-primary'>Přidej příspěvek</button>
         </form>
     </div>";
 }
@@ -86,33 +116,78 @@ if(array_key_exists("AddPost", $_POST)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VencisForum - Téma: <?php echo htmlspecialchars($topic['title']); ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <!-- Navigace -->
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
-          <a class="navbar-brand" href="index.php">VencisForum</a> <!-- Odkaz na homepage -->
+            <a class="navbar-brand" href="#">VencisForum</a>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.php">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="index.php" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Kategorie
+                        </a>
+                        <ul class="dropdown-menu">
+                            <?php foreach ($categories as $category): ?>
+                                <li><a class="dropdown-item" href="category.php?id=<?php echo $category['id']; ?>"><?php echo htmlspecialchars($category['name']); ?></a></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </li>
+                </ul>
+
+                <!-- Uživatelská ikona a jméno -->
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <?php if (isset($username)): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="logout.php">Odhlásit se</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="profile.php"><?php echo htmlspecialchars($username); ?></a>
+                        </li>
+                    <?php else: ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="login.php">Přihlásit se</a>
+                        </li>
+                    <?php endif; ?>
+                </ul>
+            </div>
         </div>
     </nav>
+
+    <!-- Formulář pro přidání příspěvku -->
     <?php echo $postForm; ?>
-    
-    </div>    
+
+    <!-- Zobrazení informací o tématu -->
     <div class="container mt-4">
         <h1>Téma: <?php echo htmlspecialchars($topic['title']); ?></h1>
         <p><strong><?php echo htmlspecialchars($topic['username']); ?></strong> - Kategorie: <?php echo htmlspecialchars($topic['category_name']); ?> - Vytvořeno: <?php echo date('d.m.Y H:i', strtotime($topic['created_at'])); ?></p>
         
+        <!-- Zobrazení obsahu tématu -->
+        <div class="topic-content">
+            <h3>Obsah tématu:</h3>
+            <p><?php echo nl2br(htmlspecialchars($topic['content'])); ?></p>
+        </div>
+
         <h3>Příspěvky v tomto tématu:</h3>
 
-        <!-- Zobrazení příspěvků -->
+        <!-- Zobrazení příspěvků včetně jejich obsahu -->
         <?php if (!empty($posts)): ?>
             <div class="list-group">
                 <?php foreach ($posts as $post): ?>
-                    <a href="post.php?id=<?php echo $post['id']; ?>" class="list-group-item list-group-item-action">
+                    <div class="list-group-item">
                         <h4 class="mb-1"><?php echo htmlspecialchars($post['title']); ?></h4>
                         <h5 class="mb-1"><?php echo htmlspecialchars($post['username']); ?></h5>
                         <p class="mb-1"><?php echo date('d.m.Y H:i', strtotime($post['created_at'])); ?></p>
-                    </a>
+                        <!-- Přímo zobrazený obsah příspěvku -->
+                        <div class="post-content mt-2">
+                            <p><?php echo nl2br(htmlspecialchars($post['content'])); ?></p>
+                        </div>
+                    </div>
                 <?php endforeach; ?>
             </div>
         <?php else: ?>
@@ -120,6 +195,6 @@ if(array_key_exists("AddPost", $_POST)) {
         <?php endif; ?>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
